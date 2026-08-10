@@ -1,0 +1,43 @@
+[project]
+name = "session4"
+version = "0.1.0"
+description = "Persistent sessions for Quixote 4"
+readme = "README.md"
+authors = [
+    { name = "R J Ladyman", email = "it@file-away.co.uk" }
+]
+license = "MIT"
+classifiers=[
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Internet :: WWW/HTTP :: Session"
+]
+requires-python = ">=3.13"
+
+[project.urls]
+Homepage = "http://www.file-away.co.uk/session3/README.html"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "quixote",
+    "setuptools",
+    "wheel",
+]
+
+#[build-system]
+#requires = ["uv_build>=0.12.1,<0.13.0"]
+#build-backend = "uv_build"
+
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["session4*"]
+
+[tool.uv.sources]
+quixote = { git = "https://github.com/nascheme/quixote" }
