@@ -21,7 +21,9 @@ Homepage = "http://www.file-away.co.uk/session3/README.html"
 
 [dependency-groups]
 dev = [
+    "coverage>=7.15.4",
     "pytest",
+    "pytest-html>=4.2.0",
     "quixote",
     "setuptools",
     "wheel",
