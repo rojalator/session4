@@ -17,7 +17,7 @@ classifiers=[
 requires-python = ">=3.13"
 
 [project.urls]
-Homepage = "http://www.file-away.co.uk/session3/README.html"
+Homepage = "http://www.file-away.co.uk/session4/README.html"
 
 [dependency-groups]
 dev = [
@@ -29,13 +29,16 @@ dev = [
     "wheel",
 ]
 
-#[build-system]
-#requires = ["uv_build>=0.12.1,<0.13.0"]
-#build-backend = "uv_build"
-
 [build-system]
-requires = ["setuptools>=70", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+source-include = ["tests/**"]
+
+#[build-system]
+#requires = ["setuptools>=70", "wheel"]
+#build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
