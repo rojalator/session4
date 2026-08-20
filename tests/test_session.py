@@ -1,12 +1,19 @@
-"""Tests for Session, form/CSRF tokens, and SessionManager.
+"""Tests for Session, form/CSRF tokens, and SessionManager: adopted from Quixote 4
 
 Constructing a Session reads the current request (remote address), so
 these tests run inside a publisher request context.  The cookie
-lifecycle tests use a publisher configured with a real SessionManager
+lifecycle tests use a publisher configured with a real B
 instead of the default NullSessionManager.
 """
 
 from collections.abc import Iterator
+from tempfile import TemporaryDirectory
+from time import sleep
+
+# do this with logging so that we can get print() output and the use
+# --log-cli-level=DEBUG with pytest
+import logging
+logging.basicConfig(level=logging.DEBUG)  # noqa
 
 import pytest
 from helpers import request_context
@@ -14,7 +21,9 @@ from helpers import request_context
 import quixote
 from quixote.directory import Directory
 from quixote.publish import Publisher
-from quixote.session import CSRF_TOKEN_NAME, NullSessionManager, Session, SessionManager
+from quixote.session import CSRF_TOKEN_NAME, Session, BaseSessionManager
+
+from session4.DirectorySessionStore import DirectorySessionStore
 
 
 class Root(Directory):
@@ -24,34 +33,53 @@ class Root(Directory):
         return 'index'
 
 
+def monkey_get(cls, key):
+    # Return the session object identified by 'session_id'.  Raise KeyError if there is no such session.
+    if session := cls.get(key, None):
+        return session
+    raise KeyError
+
+
+def monkey_has_session(cls, key):
+    return cls.__contains__(key)
+
+
 @pytest.fixture
 def session_publisher() -> Iterator[Publisher]:
     """A publisher whose sessions are kept by a real SessionManager."""
-    pub = Publisher(Root(), session_manager=SessionManager())
-    try:
-        yield pub
-    finally:
-        quixote.cleanup()
+    # We need a temporary directory for the DirectorySessionStore to play with: cleans itself up at the end
+    with TemporaryDirectory(delete=True) as sessions_directory:
+        # We need a particular session store: currently just a DirectorySessionStore
+        session_store = DirectorySessionStore(sessions_directory=sessions_directory)
+        BaseSessionManager.__getitem__ = monkey_get
+        BaseSessionManager.has_session = monkey_has_session
+        Session.MAX_FORM_TOKENS = 32
+        session_manager = BaseSessionManager(session_store=session_store, session_class=Session)
+        pub = Publisher(Root(), session_manager=session_manager)
+        try:
+            yield pub
+        finally:
+            quixote.cleanup()
 
 
 class TestSession:
-    def test_a_new_session_is_empty(self, publisher: Publisher) -> None:
-        with request_context(publisher):
+    def test_a_new_session_is_empty(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher):
             session = Session('abc')
         assert session.id == 'abc'
         assert session.get_user() is None
         assert session.get_remote_address() == '127.0.0.1'
         assert session.has_info() is False
 
-    def test_setting_a_user_gives_the_session_info(self, publisher: Publisher) -> None:
-        with request_context(publisher):
+    def test_setting_a_user_gives_the_session_info(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher):
             session = Session(None)
         session.set_user('alice')
         assert session.get_user() == 'alice'
         assert session.has_info() is True
 
-    def test_start_request_exports_the_user_to_the_environ(self, publisher: Publisher) -> None:
-        with request_context(publisher) as request:
+    def test_start_request_exports_the_user_to_the_environ(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher) as request:
             session = Session(None)
             session.set_user('alice')
             session.start_request()
@@ -59,16 +87,16 @@ class TestSession:
 
 
 class TestFormTokens:
-    def test_created_tokens_are_outstanding_until_removed(self, publisher: Publisher) -> None:
-        with request_context(publisher):
+    def test_created_tokens_are_outstanding_until_removed(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher):
             session = Session(None)
         token = session.create_form_token()
         assert session.has_form_token(token) is True
         session.remove_form_token(token)
         assert session.has_form_token(token) is False
 
-    def test_the_oldest_token_is_dropped_beyond_the_maximum(self, publisher: Publisher) -> None:
-        with request_context(publisher):
+    def test_the_oldest_token_is_dropped_beyond_the_maximum(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher):
             session = Session(None)
         first = session.create_form_token()
         last = first
@@ -79,59 +107,29 @@ class TestFormTokens:
 
 
 class TestCsrfTokens:
-    def test_the_csrf_token_is_stable_within_a_session(self, publisher: Publisher) -> None:
-        with request_context(publisher):
+    def test_the_csrf_token_is_stable_within_a_session(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher):
             session = Session(None)
         assert session.get_csrf_token() == session.get_csrf_token()
 
-    def test_a_get_request_never_validates(self, publisher: Publisher) -> None:
-        with request_context(publisher) as request:
+    def test_a_get_request_never_validates(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher) as request:
             session = Session(None)
             request.form[CSRF_TOKEN_NAME] = session.get_csrf_token()
             assert session.valid_csrf_token() is False
 
-    def test_a_post_with_the_matching_token_validates(self, publisher: Publisher) -> None:
-        with request_context(publisher, method='POST') as request:
+    def test_a_post_with_the_matching_token_validates(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher, method='POST') as request:
             session = Session(None)
             request.form[CSRF_TOKEN_NAME] = session.get_csrf_token()
             assert session.valid_csrf_token() is True
 
-    def test_a_post_with_a_wrong_token_does_not_validate(self, publisher: Publisher) -> None:
-        with request_context(publisher, method='POST') as request:
+    def test_a_post_with_a_wrong_token_does_not_validate(self, session_publisher: Publisher) -> None:
+        with request_context(session_publisher, method='POST') as request:
             session = Session(None)
             session.get_csrf_token()
             request.form[CSRF_TOKEN_NAME] = 'wrong'
             assert session.valid_csrf_token() is False
-
-
-class TestSessionManagerMapping:
-    def test_stored_sessions_are_found_again(self, publisher: Publisher) -> None:
-        manager = SessionManager()
-        with request_context(publisher):
-            session = Session('sid1')
-        manager['sid1'] = session
-        assert 'sid1' in manager
-        assert manager.has_session('sid1') is True
-        assert manager['sid1'] is session
-        assert manager.get('sid1') is session
-        assert manager.keys() == ['sid1']
-        assert manager.values() == [session]
-        assert manager.items() == [('sid1', session)]
-
-    def test_missing_sessions_give_the_default_or_raise(self, publisher: Publisher) -> None:
-        manager = SessionManager()
-        assert manager.get('nope', 'dflt') == 'dflt'
-        assert 'nope' not in manager
-        with pytest.raises(KeyError):
-            del manager['nope']
-
-    def test_deleted_sessions_are_gone(self, publisher: Publisher) -> None:
-        manager = SessionManager()
-        with request_context(publisher):
-            session = Session('sid1')
-        manager['sid1'] = session
-        del manager['sid1']
-        assert 'sid1' not in manager
 
 
 class TestSessionLifecycle:
@@ -178,8 +176,59 @@ class TestSessionLifecycle:
             assert request.session is None
 
 
-class TestNullSessionManager:
-    def test_it_stores_nothing(self) -> None:
-        manager = NullSessionManager()
-        assert manager.get('anything', 'dflt') == 'dflt'
-        assert list(manager) == []
+class TestSessionManagerRetention:
+    def test_stored_sessions_are_found_again(self, session_publisher: Publisher) -> None:
+        manager = session_publisher.session_manager
+        with request_context(session_publisher):
+            session = manager.new_session('sid1')
+            manager.store.save_session(session)
+        assert manager.__contains__('sid1') is True
+        assert 'sid1' in manager
+        # Can we load it?
+        saved_session = manager.get(session.id)
+        assert saved_session.id == session.id
+
+    def test_missing_sessions_give_the_default_or_raise(self, session_publisher: Publisher) -> None:
+        manager = session_publisher.session_manager
+        assert manager.get('nope', 'dflt') == 'dflt'
+        assert 'nope' not in manager
+        # Now delete the non-existent session
+        with pytest.raises(FileNotFoundError):
+            manager.store.delete_session('nope')
+
+    def test_deleted_sessions_are_gone(self, session_publisher: Publisher) -> None:
+        manager = session_publisher.session_manager
+        with request_context(session_publisher):
+            session = manager.new_session('sid2')
+            manager.store.save_session(session)
+        assert manager.__contains__('sid2') is True
+        # Now get rid of it...
+        del manager['sid2']
+        # It should be gone...
+        assert manager.get('sid2', default='none_such') == 'none_such'
+        assert manager.__contains__('sid2') is False
+        assert 'sid2' not in manager
+
+
+class TestManagerSetGet:
+    def test_stored_sessions_are_found_again_setget(self, session_publisher: Publisher) -> None:
+        manager = session_publisher.session_manager
+        with request_context(session_publisher):
+            session = Session('sid1')
+        manager['sid1'] = session
+        assert 'sid1' in manager
+        assert manager.has_session('sid1') is True
+        assert manager.__contains__('sid1') is True
+        assert manager['sid1'].id == session.id
+
+    def test_nonsuch_id_raises_error_setget(self, session_publisher: Publisher):
+        manager = session_publisher.session_manager
+        with pytest.raises(KeyError):
+            _ = manager['no such key']
+
+    def test_missing_sessions_give_the_default_or_raise_setget(self, session_publisher: Publisher) -> None:
+        manager = session_publisher.session_manager
+        assert manager.get('nope', 'dflt') == 'dflt'
+        assert 'nope' not in manager
+        with pytest.raises(FileNotFoundError):
+            del manager['nope']

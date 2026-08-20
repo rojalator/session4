@@ -1,0 +1,10 @@
+Acknowledgements
+================
+
+This code (session4) is a rewrite of session3 to work consistently with Quixote 4.
+Session3 was itself a rewrite of Sesson2.
+
+Session2:
+---------
+C. Titus Brown
+Mike Orr
