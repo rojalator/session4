@@ -1,0 +1,16 @@
+Recode the MySQL, Postgresql and ShelveSessionStore stores.
+(Version 0.1.0 only supports DirectorySessionStore at the moment.)
+
+ShelveSessionStore has no file locking, so is unsafe for multi-process
+deployment (SCGI, CGI, FastCGI).
+
+Generate documentation
+pdoc --html   --all-submodules --html-dir docpdoc session3
+pycco --generate_index --paths --directory pyccodocs  ./**/*.py
+
+pycco --generate_index --paths -s  --directory pyccdocs  ./**/**/*.py ./session3/*.py
+rst2html5.py --footnote-references=superscript --smart-quotes=yes -g -d -t  README.rst > README.html
+
+
+Correct Manifest.in, README.md (and its links). Add server for testing.
+Update Makefile with changes (e.g. for creating documentation).

@@ -1,0 +1,8 @@
+global-include *.py *.ptl
+include *.txt *.rst MANIFEST.in
+ 
+ *.html TODO *.css
+recursive-include docs/ *.txt *.css  *.html src
+include Makefile
+
+include doc/*.txt doc/*.css doc/*.html doc/Makefile
