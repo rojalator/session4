@@ -6,4 +6,4 @@ setup:
 
 # Run from top-level directory. Creates a pytest html report and a coverage report (in htmlcov)
 test:
-	pytest --html PyTest_Report.html --cov=./ --cov-report html
+	pytest -s  --html PyTest_Report.html --cov=./ --cov-report html --log-cli-level=DEBUG

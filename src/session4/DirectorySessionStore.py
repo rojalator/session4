@@ -49,8 +49,11 @@ As save_session() truncated the file and then waited for an exclusive lock, we h
 load_session() check for a zero-sized file. If it has one, then save_session() has just created (or re-created)
 it and we should let go and try again.
 
+The originial code worked fine on hard discs but begain failing when SSDs came into use (due to speed, I suspect)
+
 ### Addendum
 It turns out that, during testing, one can get at `EOFError` from pickle anyway, so a check for that was added too.
+
 """
 from collections.abc import Iterator
 import fcntl
@@ -60,7 +63,8 @@ import pickle
 import time
 from pickle import dump, load
 
-from quixote.session import SessionStore, Session
+from quixote.session import SessionStore
+from session4.Session4Session import Session4 as Session
 
 
 class DirectorySessionStore(SessionStore):
@@ -110,7 +114,6 @@ class DirectorySessionStore(SessionStore):
 
             except OSError:
                 return None
-
         return pickled_obj
 
     def save_session(self, session: Session) -> None:
@@ -122,6 +125,7 @@ class DirectorySessionStore(SessionStore):
         # (the naughty thing) but it will get a zero-sized file (`wb` mode truncates the file)
         fcntl.flock(f.fileno(), fcntl.LOCK_EX)
         try:
+            session.preserve_current_values()
             dump(session, f, self.pickle_protocol)
         finally:
             fcntl.flock(f.fileno(), fcntl.LOCK_UN)
@@ -211,125 +215,3 @@ class DirectorySessionStore(SessionStore):
                 sessions_remaining += 1
 
         return sessions_deleted, sessions_remaining
-
-#
-#
-# class OLDDirectorySessionStore(SessionStore):
-#     """
-#     Store sessions in individual files within a directory.
-#     """
-#
-#     is_multiprocess_safe = False  # Needs file locking; OS-specific.
-#     is_thread_safe = False        # Needs file locking or synchronization.
-#     # For Python3 we now use the highest protocol at time of writing,
-#     # being protocol 4 (it was 2)
-#     pickle_protocol = 4
-#
-#     def __init__(self, directory, create=False):
-#         """
-#         `__init__` takes a directory name, with an option to create it if
-#         it's not already there.
-#         """
-#         directory = os.path.abspath(directory)
-#
-#         # Make sure the directory exists:
-#         if not os.path.exists(directory):
-#             if create:
-#                 os.mkdir(directory)
-#             else:
-#                 raise OSError("error, '%s' does not exist." % (directory,))
-#
-#         # Is it actually a directory?
-#         if not os.path.isdir(directory):
-#             raise OSError("error, '%s' is not a directory." % (directory,))
-#
-#         self.directory = directory
-#
-#     def _make_filename(self, id):
-#         """Build the filename from the session ID."""
-#         return os.path.join(self.directory, id)
-#
-#     def save_session(self, session):
-#         """Pickle the session and save it into a file."""
-#         filename = self._make_filename(session.id)
-#         f = open(filename, 'wb')
-#         # We wait at the following statement until we get an exclusive lock.
-#         # Note that `load_session()` can sometimes jump in here before we get the lock
-#         # (the naughty thing) but it will get a zero-sized file (`wb` mode truncates the file)
-#         fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-#         try:
-#             dump(session, f, self.pickle_protocol)
-#         finally:
-#             fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-#             f.close()
-#
-#     def load_session(self, id, default=None):
-#         """Load the pickled session from a file."""
-#         filename = self._make_filename(id)
-#         finished = False
-#         while not finished:
-#             try:
-#                 f = open(filename, 'rb')
-#                 # Sometimes we get the following lock AFTER `save_session()` has created
-#                 # the file but BEFORE it has locked it. If so, we'll have a zero-sized file
-#                 # (hence the loop, BTW, so don't be tempted to remove it).
-#                 fcntl.flock(f.fileno(), fcntl.LOCK_SH)
-#                 if os.stat(f.fileno()).st_size == 0:
-#                     fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-#                     f.close()
-#                     # Wait around for a bit and then loop...
-#                     time.sleep(SLEEPY_TIME)
-#                 else:
-#                     try:
-#                         obj = load(f)
-#                         # **Don't be tempted to move this into a finally**
-#                         fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-#                         f.close()
-#                         finished = True
-#                     except EOFError:
-#                         # Sometimes we'll also get `EOFError` from pickle anyway, so we might
-#                         # as well trap for that too (and then loop)...
-#                         fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-#                         f.close()
-#                         time.sleep(SLEEPY_TIME)
-#
-#             except OSError:
-#                 obj = default
-#                 finished = True
-#
-#         return obj
-#
-#     def delete_session(self, session):
-#         """
-#         Delete the session file.
-#         """
-#
-#         filename = self._make_filename(session.id)
-#         os.unlink(filename)
-#
-#     def delete_old_sessions(self, minutes) -> tuple[int, int]:
-#         """
-#         Delete all sessions that have not been modified for N minutes.
-#
-#         This method is never called by the session manager.  It's for
-#         your application maintenance program; e.g., a daily cron job.
-#
-#         DirectorySessionStore.delete_old_sessions returns a tuple:
-#
-#             (n_deleted, n_remaining)
-#         """
-#
-#         deleted = 0
-#         remaining = 0
-#         for sess_id in os.listdir(self.directory):
-#             pth = self._make_filename(sess_id)
-#             mtime = os.stat(pth).st_mtime
-#             inactive_for = (time.time() - mtime) / 60.0
-#
-#             if inactive_for > minutes:
-#                 os.unlink(pth)
-#                 deleted += 1
-#             else:
-#                 remaining += 1
-#
-#         return deleted, remaining
