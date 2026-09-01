@@ -19,7 +19,7 @@ altdemo:
 
 documentation:
 	uv run $(PDOC) doc/api src/session4
-	#$(PYCCO) doc/literate ./src/session4/*.py ./src/session4/*.py ./tests/*.py
+	#uv run $(PYCCO) doc/literate src/session4/*.py src/session4/*.py tests/*.py
 
 # Call 'make clean' to get rid of the documentation directory's html entries
 # No directory or file will be called 'clean' so mark it as a phony

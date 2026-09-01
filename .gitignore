@@ -31,7 +31,7 @@ wheels/
 # Documentation
 doc/api/
 objects.inv
-
+doc/literate
 
 # Unit test / coverage reports
 htmlcov/

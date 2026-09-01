@@ -12,7 +12,7 @@ The current author is Robert Ladyman, <it@file-away.co.uk>
 
 Version
 
-:   0.1.0 released August 2026 (in development)
+:   4.0a1 released August 2026 (in development). Version numbers tend to track Quixote
 
 Status
 
@@ -36,7 +36,7 @@ It also (by design) forgets the sessions when the Publisher quits.
 [Session4](https://github.com/rojalator/session4) provides replacement
 session manager, session and store classes to allow persistence for sessions using Quixote.[^1]
 
-Session4 version 0.1.0 provides a fully functional[^2] persistent storage back-end for use with
+Session4 version 4.0a1 provides a fully functional[^2] persistent storage back-end for use with
 Quixote 4 and above (also see [Road-map](#road-map) below, for future session4 version notes):-
 
 [DirectorySessionStore](https://rojalator.github.io/session4/literate/session4/store/DirectorySessionStore.html)
@@ -81,8 +81,7 @@ unpack the tar.gz file and install the normal Python way.
 
 ### Documentation
 
-[API documentation](https://rojalator.github.io/session4/moduleIndex.html) is available as
-is [Literate Programming documentation](https://rojalator.github.io/session4/literate/)
+[API documentation](https://rojalator.github.io/session4/moduleIndex.html) is available
 --- either read it on-line or run:
 > make documentation
 
@@ -110,8 +109,7 @@ then in your ``create_publisher()`` function, you might place the following code
     publisher = Publisher(..., session_manager=session_manager)
 
 Each session store has different initialization requirements: see
-the [API documentation](https://rojalator.github.io/session4/moduleIndex.html) or
-the [literate programming documentation](https://rojalator.github.io/session4/literate/)
+the [API documentation](https://rojalator.github.io/session4/moduleIndex.html) 
 for more information.
 
 ## Features
@@ -162,5 +160,5 @@ See [CHANGES.txt](doc/CHANGES.txt) in the ``doc/`` directory
 unsurprisingly, Quixote 2)
 
 [^2]: Note that only
-[DirectorySessionStore](https://rojalator.github.io/session3/literate/session3/store/DirectorySessionStore.html)
-is working for version 3.4
+[DirectorySessionStore](https://rojalator.github.io/session4/moduleIndex.html)
+is working for version 4.0.0

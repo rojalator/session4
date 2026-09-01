@@ -1,9 +1,8 @@
 2026, August <it@file-away.co.uk>
 	* Session4 created to work with Quixote4 (code from session3)
-	* Version 0.1.0 
+	* Version 4.0a1 (to track Quixote)
 	* Added autodetection of changes to session attributes. For is_dirty() to work, Session4 stores a string
 	  representation of the attributes at last save and compares them to (a string representation of) the
 	  current attribute values. This is managed through _last_values in Session4 and by
 	  DirectorySessionStore's save_session() calling Session4's preserve_current_values()
-	
-
+	* Removed Pycco for documentation as Dycco needs an update (AST developers removed stuff again!)
