@@ -81,7 +81,11 @@ greater which is also available via pip or from
 
 [API documentation](https://rojalator.github.io/session4/moduleIndex.html) is available as
 is [Literate Programming documentation](https://rojalator.github.io/session4/literate/)
---- either read it on-line or extract it from the tar.gz file.
+--- either read it on-line or run:
+> make documentation
+
+This will create files within directories with the ``doc/`` directory. You will need
+``pydoctor`` installed.
 
 ## Using session4
 

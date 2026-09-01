@@ -221,5 +221,7 @@ class DirectorySessionStore(SessionStore):
         return sessions_deleted, sessions_remaining
 
     def setup(self):
-        # Nothing to do here: but a directory could be created, etc.
+        """
+        Nothing to do here: but a directory could be created, etc.
+        """
         pass

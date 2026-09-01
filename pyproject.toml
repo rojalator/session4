@@ -21,6 +21,8 @@ Homepage = "http://www.file-away.co.uk/session4/README.html"
 
 [dependency-groups]
 dev = [
+    "make>=0.1.6.post2",
+    "pydoctor>=25.10.1",
     "pytest",
     "pytest-cov>=7.1.0",
     "pytest-html>=4.2.0",

@@ -28,6 +28,10 @@ wheels/
 .installed.cfg
 *.egg
 
+# Documentation
+doc/api/
+objects.inv
+
 
 # Unit test / coverage reports
 htmlcov/
