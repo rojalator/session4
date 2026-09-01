@@ -1,0 +1,155 @@
+"""Demonstrate the Quixote form class."""
+
+import time
+
+from quixote.form import (
+    CheckboxWidget,
+    FileWidget,
+    Form,
+    MultipleSelectWidget,
+    PasswordWidget,
+    RadiobuttonsWidget,
+    SingleSelectWidget,
+    StringWidget,
+)
+from quixote.form.css import BASIC_FORM_CSS
+from quixote.ptl import ptl_html
+from quixote.util import dump_request
+
+
+class Topping:
+    def __init__(self, name, cost):
+        self.name = name
+        self.cost = cost  # in cents
+
+    def __str__(self):
+        return "%s: $%.2f" % (self.name, self.cost / 100.0)
+
+    def __repr__(self):
+        return "<%s at %08x: %s>" % (self.__class__.__name__, id(self), self)
+
+
+TOPPINGS = [
+    Topping('cheese', 50),
+    Topping('pepperoni', 110),
+    Topping('green peppers', 75),
+    Topping('mushrooms', 90),
+    Topping('sausage', 100),
+    Topping('anchovies', 30),
+    Topping('onions', 25),
+]
+
+
+def form_demo():
+    # build form
+    form = Form(enctype="multipart/form-data")  # enctype for file upload
+    form.add(StringWidget, "name", title="Your Name", size=20, required=True)
+    form.add(
+        PasswordWidget,
+        "password",
+        title="Password",
+        size=20,
+        maxlength=20,
+        required=True,
+    )
+    form.add(CheckboxWidget, "confirm", title="Are you sure?")
+    form.add(
+        RadiobuttonsWidget,
+        "color",
+        title="Eye color",
+        options=['green', 'blue', 'brown', 'other'],
+    )
+    form.add(
+        SingleSelectWidget,
+        "size",
+        title="Size of pizza",
+        value='medium',
+        options=[
+            ('tiny', 'Tiny (4")'),
+            ('small', 'Small (6")'),
+            ('medium', 'Medium (10")'),
+            ('large', 'Large (14")'),
+            ('enormous', 'Enormous (18")'),
+        ],
+        size=1,
+    )
+    # select widgets can use any type of object, no just strings
+    form.add(
+        MultipleSelectWidget,
+        "toppings",
+        title="Pizza Toppings",
+        value=[TOPPINGS[0]],
+        options=TOPPINGS,
+        size=5,
+    )
+    form.add(FileWidget, "file", title="Your Pizza Specification")
+    form.add_hidden('time', value=time.time())
+    form.add_submit("go", "Go!")
+
+    @ptl_html
+    def render():
+        F"""
+        <html>
+        <head><title>Quixote Form Demo</title>
+        <style type="text/css">
+        %s
+        </style>
+        </head>
+        <body>
+        <h1>Quixote Form Demo</h1>
+        """ % BASIC_FORM_CSS
+        form.render()
+        F"""
+        </body>
+        </html>
+        """
+
+    if not form.is_submitted() or form.has_errors():
+        return render()
+
+    # Could to more error checking, set errors and return render().
+
+    # The data has been submitted and verified.  Do something interesting
+    # with it (save it in DB, send email, etc.).  We'll just display it.
+    @ptl_html
+    def success():
+        F"""
+        <html>
+        <head><title>Quixote Form Demo</title></head>
+        <body>
+        <h2>Form data:</h2>
+        <table>
+            <tr>
+              <th align=left>Name</th>
+              <th align=left>Type</th>
+              <th align=left>Value</th>
+            </tr>
+        """
+        for widget in form.get_all_widgets():
+            value = widget.parse()
+            F'<tr>'
+            F'  <td>%s</td>' % widget.get_name()
+            F'  <td>%s</td>' % getattr(
+                value, str('__class__'), type(value)
+            ).__name__
+            F'<td>'
+            if value is None:
+                F"<i>None</i>"
+            elif isinstance(widget, FileWidget):
+                repr(value)
+                F' (%s bytes %s)' % (len(value.fp.read()), value.get_size())
+            else:
+                repr(value)
+            F'</td>'
+            F'</tr>'
+        F"""
+        </table>
+        <h2>Request dump:</h2>
+        """
+        dump_request()
+        F"""
+        </body>
+        </html>
+        """
+
+    return success()

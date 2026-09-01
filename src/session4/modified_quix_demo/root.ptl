@@ -1,0 +1,139 @@
+"""The root directory for the Quixote demo."""
+
+import base64
+import time
+
+from quixote import current_response
+# from session4.demo.extras import ExtraDirectory
+from quixote.directory import Directory, export, subdir
+from quixote.errors import PublishError
+from quixote.ptl import ptl_html
+from quixote.util import dump_request
+
+from modified_quix_demo.extras import ExtraDirectory  # noqa
+
+
+class RootDirectory(Directory):
+    _q_exports = ['extras']
+
+    @export(name='')
+    @ptl_html
+    def index(self):
+        print("Session4: debugging message from the index page")
+        F"""
+        <html>
+        <head>
+        <title>Session4: Quixote Demo</title>
+        <link rel="stylesheet" href="css" type="text/css" />
+        </head>
+        <body>
+        <h1>Hello, world! This is the Session4 demonstration</h1>
+
+        <p>To understand what's going on here, be sure to read the
+        <code>doc/demo.txt</code> file included with Quixote.</p>
+
+        <p>
+        Here are some features of this demo:
+          <ul>
+            <li><a href="simple">simple</a>:
+                A Python function that generates a very simple document.
+            <li><a href="plain">plain</a>:
+                A Python function that generates a plain text document.
+            <li><a href="error">error</a>:
+                A Python function that raises an exception.
+            <li><a href="publish_error">publish_error</a>:
+                A Python function that raises
+                a <code>PublishError</code> exception.  This exception
+                will be caught and formatted by the
+                <code>Publisher.format_publish_error()</code> method.
+            <li><a href="dumpreq">dumpreq</a>:
+                Print out the contents of the HTTPRequest object.
+            <li><a href="css">css</a>:
+                The stylesheet for this document.
+            <li><a href="dynamic/">dynamic/</a>:
+                A sub-directory object that gets created for each request.
+            <li><a href="extras/">extras/</a>:
+                Demos of some of Quixote's more advanced features.
+          </ul>
+        </p>
+        </body>
+        </html>
+        """
+
+    @export
+    @ptl_html
+    def simple(self):
+        F'<html><body>Hello!</body></html>'
+
+    @export
+    def plain(self):
+        current_response().set_content_type("text/plain")
+        return "This is a plain text document."
+
+    @export
+    def error(self):
+        raise ValueError("this is a Python exception")
+
+    @export
+    def publish_error(self):
+        raise PublishError("Publishing error raised by publish_error")
+
+    @export
+    @ptl_html
+    def dumpreq(self):
+        F"""
+        <html>
+        <head><title>HTTPRequest Object</title></head>
+        <body>
+        <h1>HTTPRequest Object</h1>
+        """
+        dump_request()
+        F"""
+        </body>
+        </html>
+        """
+
+    @export
+    def css(self):
+        current_response().set_content_type("text/css")
+        # on a real site we would also set the expires header
+        return 'body { border: thick solid green; padding: 2em; }'
+
+    @export(name='favicon.ico')
+    def favicon_ico(self):
+        response = current_response()
+        response.set_content_type("image/x-icon")
+        response.set_expires(days=1)
+        return FAVICON
+
+    @subdir
+    def dynamic(self):
+        # created fresh for each request
+        return DynamicDirectory()
+
+    # We don't use the subdir() decorator here because we want to keep
+    # the ExtraDirectory() instance between requests (e.g. for efficiency).
+    # Note that we have to explicitly list 'extras' in _q_exports.
+    extras = ExtraDirectory()
+
+
+class DynamicDirectory(Directory):
+    def __init__(self):
+        self.birthday = time.asctime()
+
+    @export(name='')
+    def index(self):
+        current_response().set_content_type("text/plain")
+        return "This (Session4) little page was created on %s." % self.birthday
+
+
+FAVICON = base64.b64decode(
+    """\
+AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAADJZmEA4KilAMJQSwDZko8Aujo0AOi9uwDRfHgA9+npAP///wDw1NIAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiSQDiIiIiIiGRYSIiIiIYkRFiIiIiFQlhk
+RYiIiIBAeGRAiIiIFEE2aUQYiIhkSHV4RGiIiGRIiIhEaIiIZEiIiERoiIiUSYiJRJiIiIZDiING
+iIiIh2RlEmeIiIiIiBYYiIiIiIiIiIiIiIgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+"""
+)

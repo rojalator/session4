@@ -8,7 +8,7 @@ a Session4SessionManager) instead of the default NullSessionManager.
 
 from collections.abc import Iterator
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, NamedTemporaryFile
 
 # do this with logging so that we can get print() output and the use
 # --log-cli-level=DEBUG with pytest
@@ -60,6 +60,24 @@ def file_exists(file_path: str) -> bool:
 
 
 class TestSession:
+    def test_not_a_directory(self) -> None:
+        with NamedTemporaryFile(delete=True) as not_a_directory:
+            with pytest.raises(OSError):
+                _ = DirectorySessionStore(sessions_directory=not_a_directory.name)
+
+    def test_do_not_create_directory(self) -> None:
+        with pytest.raises(OSError):
+            _ = DirectorySessionStore(sessions_directory='none_such', create_directory=False)
+
+    def test_transaction_functions_and_setup(self, session_publisher: Publisher) -> None:
+        store = session_publisher.session_manager.store
+        with request_context(session_publisher):
+            session = Session4('abc')
+            assert store.setup() is None
+            assert store.transaction_start() is None
+            assert store.transaction_abort(session) is None
+            assert store.transaction_commit(session) is None
+
     def test_a_new_session_is_empty(self, session_publisher: Publisher) -> None:
         with request_context(session_publisher):
             session = Session4('abc')
@@ -258,6 +276,21 @@ class TestSessionManagerRetention:
             assert 'not_old_session' in manager
             deleted, remaining = manager.store.delete_old_sessions(1)  # noqa
             assert not deleted and remaining == 1
+
+    def test_iter(self, session_publisher: Publisher) -> None:
+        manager = session_publisher.session_manager
+        with request_context(session_publisher):
+            # Create a bunch of sessions...
+            for i in range(0, 5):
+                session = manager.new_session(str(i))
+                manager.store.save_session(session)
+                assert file_exists(str(i))
+            # use iter to look at them
+            session_list = [session_id for session_id in manager.store]
+            # Check that they are correct
+            assert len(session_list) == 5
+            for s in range(0, 5):
+                assert str(i) in session_list
 
 
 class TestSessionValues:

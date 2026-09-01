@@ -25,7 +25,8 @@ class Session4SessionManager(BaseSessionManager):
 
 class Session4(Session):
     """
-    This adapts Quixote's own Session class to overwrite is_dirty() so that
+    This adapts Quixote's own Session class to overwrite is_dirty() so that the session
+    instance automatically detects changes to its values or additions or removals of members.
 
     Additional Instance attributes:
       _last_values : string

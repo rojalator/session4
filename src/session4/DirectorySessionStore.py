@@ -59,6 +59,7 @@ from collections.abc import Iterator
 import fcntl
 import os
 import os.path
+from pathlib import Path
 import pickle
 import time
 from pickle import dump, load
@@ -73,7 +74,7 @@ class DirectorySessionStore(SessionStore):
     The noqa in the definitions are because 'id' is a Python keyword (blame Quixote, not me!)
     """
 
-    is_multiprocess_safe = False  # Needs file locking; OS-specific.
+    is_multiprocess_safe = True  # Needs file locking; OS-specific, limited to POSIX
     is_thread_safe = False  # Needs file locking or synchronization.
     # For Python3 we now use the highest protocol
     pickle_protocol = pickle.HIGHEST_PROTOCOL
@@ -144,8 +145,11 @@ class DirectorySessionStore(SessionStore):
         return self.load_session(id) is not None
 
     def __iter__(self) -> Iterator[str]:
-        """Return an iterator of all session IDs in the storage."""
-        raise NotImplementedError()
+        """Return an iterator of all session IDs in the storage.
+        In our case, the session id is just the file-name"""
+        all_files = Path(self.directory).glob('*')
+        the_ids = [p.name for p in all_files if p.is_file()]
+        return iter(the_ids)
 
     def transaction_start(self) -> None:
         """Called near the beginning of each request: after the HTTPRequest
@@ -215,3 +219,7 @@ class DirectorySessionStore(SessionStore):
                 sessions_remaining += 1
 
         return sessions_deleted, sessions_remaining
+
+    def setup(self):
+        # Nothing to do here: but a directory could be created, etc.
+        pass
