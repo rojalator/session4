@@ -29,7 +29,7 @@ wheels/
 *.egg
 
 # Documentation
-doc/api/
+# doc/api/
 objects.inv
 doc/literate
 
