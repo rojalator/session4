@@ -1,8 +1,14 @@
-global-include *.py *.ptl
-include *.txt *.rst MANIFEST.in
- 
- *.html TODO *.css
-recursive-include docs/ *.txt *.css  *.html src
+# added by check-manifest
+include *.in
+include *.lock
+include *.txt
 include Makefile
-
-include doc/*.txt doc/*.css doc/*.html doc/Makefile
+recursive-include doc *.jpg
+recursive-include doc *.md
+recursive-include doc *.txt
+recursive-include doc *.css  *.html
+global-include *.py *.ptl
+recursive-include src
+include *.txt MANIFEST.in
+include doc/*.txt doc/*.css doc/*.html
+recursive-include tests *.md
