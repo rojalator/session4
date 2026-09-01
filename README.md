@@ -70,12 +70,14 @@ and / or include helpful code in the package.
 
 ### Installation
 
+See the [installation instructions](doc/INSTALL.txt). You can use "uv" to install:
+```
+uv sync
+```
+
 Session4 can be installed via pip (`pip3 install session4`).
 Alternatively (or if you also want the documentation) download and
-unpack the tar.gz file and install the normal Python way
-(`python4 setup.py install`). Note that Session4 requires Quixote 4 or
-greater which is also available via pip or from
-[Quixote](https://github.com/nascheme/quixote)'s repository.
+unpack the tar.gz file and install the normal Python way.
 
 ### Documentation
 
