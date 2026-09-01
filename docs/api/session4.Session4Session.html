@@ -6,7 +6,7 @@
 
   <head>
     
-    <title>session4.modified_quix_demo</title>
+    <title>session4.Session4Session</title>
     <meta name="generator" content="pydoctor 25.10.1"> 
         
     </meta>
@@ -109,14 +109,17 @@
   <div>
 
       <div class="thingTitle">
-        <span>Package</span>
-        <code class="thisobject"><a href="session4.modified_quix_demo.html" class="internal-link" title="This package">modified<wbr></wbr>_quix<wbr></wbr>_demo</a></code> 
+        <span>Module</span>
+        <code class="thisobject"><a href="session4.Session4Session.html" class="internal-link" title="This module"><wbr></wbr>Session4<wbr></wbr>Session</a></code> 
       </div>
       
       <div>
         
 
-        <div class="childrenKindTitle">Modules</div>
+        
+         
+
+        <div class="childrenKindTitle">Classes</div>
         <ul>
     
     <li class="">
@@ -125,7 +128,7 @@
         
 
         
-            <div class="itemName"><code><a href="session4.modified_quix_demo.altdemo.html" class="internal-link" title="session4.modified_quix_demo.altdemo">altdemo</a></code>
+            <div class="itemName"><code><a href="session4.Session4Session.Session4.html" class="internal-link" title="session4.Session4Session.Session4"><wbr></wbr>Session4</a></code>
             </div>
         
 
@@ -135,31 +138,15 @@
         
 
         
-            <div class="itemName"><code><a href="session4.modified_quix_demo.mini_demo.html" class="internal-link" title="session4.modified_quix_demo.mini_demo">mini<wbr></wbr>_demo</a></code>
+            <div class="itemName"><code><a href="session4.Session4Session.Session4SessionManager.html" class="internal-link" title="session4.Session4Session.Session4SessionManager"><wbr></wbr>Session4<wbr></wbr>Session<wbr></wbr>Manager</a></code>
             </div>
         
 
     </li>
-</ul> 
+</ul>
 
         
-        
-
-        <div class="childrenKindTitle">Functions</div>
-        <ul>
-    
-    <li class="">
-        
-        
-        
-
-        
-            <div class="itemName"><code><a href="#create_publisher" class="internal-link" title="session4.modified_quix_demo.create_publisher">create<wbr></wbr>_publisher</a></code>
-            </div>
-        
-
-    </li>
-</ul> 
+         
 
         
          
@@ -175,7 +162,7 @@
 
       <div class="thingTitle">
         <span>Package</span>
-        <code><a href="index.html" class="internal-link" title="The parent of this package">session4</a></code> 
+        <code><a href="index.html" class="internal-link" title="The parent of this module">session4</a></code> 
       </div>
       
       <div>
@@ -194,7 +181,7 @@
             </div>
         
 
-    </li><li class=" thisobject">
+    </li><li class="">
         
         
         
@@ -204,7 +191,7 @@
             </div>
         
 
-    </li><li class="">
+    </li><li class=" thisobject">
         
         
         
@@ -251,14 +238,14 @@
         
 
         <div class="page-header">
-          <h1 class="package"><code><code><a href="index.html" class="internal-link">session4</a></code><wbr></wbr>.<code><a href="session4.modified_quix_demo.html" class="internal-link" title="session4.modified_quix_demo">modified_quix_demo</a></code></code></h1>
+          <h1 class="module"><code><code><a href="index.html" class="internal-link">session4</a></code><wbr></wbr>.<code><a href="session4.Session4Session.html" class="internal-link" title="session4.Session4Session">Session4Session</a></code></code></h1>
           <div id="show-private">
             <button class="btn btn-link" onclick="togglePrivate()">Toggle Private API</button>
           </div>
         </div>
 
         <div class="categoryHeader">
-          package documentation
+          module documentation
         </div>
 
         <div class="extrasDocstring">
@@ -266,65 +253,33 @@
         </div>
 
         <div class="moduleDocstring">
-          <div><p class="undocumented">Undocumented</p></div>
+          <div><p class="pre">This extends Quixote's session class to have auto-detection of added or changed
+members or values, including lists, etc.</p></div>
         </div>
 
         <div id="split-tables">
-          <table class="children sortable" id="id7">
+          <table class="children sortable" id="id4">
   
   
-  <tr class="module">
+  <tr class="class">
     
-    <td>Module</td>
-    <td><code><a href="session4.modified_quix_demo.altdemo.html" class="internal-link" title="session4.modified_quix_demo.altdemo">altdemo</a></code></td>
-    <td>An alternative Quixote demo.  This version is contained in a single module and does not use PTL.  The easiest way to run this demo is to use the simple HTTP server included with Quixote.  For example:</td>
-  </tr><tr class="module">
+    <td>Class</td>
+    <td><code><a href="session4.Session4Session.Session4.html" class="internal-link" title="session4.Session4Session.Session4"><wbr></wbr>Session4</a></code></td>
+    <td>This adapts Quixote's own Session class to overwrite is_dirty() so that the session instance automatically detects changes to its values or additions or removals of members.</td>
+  </tr><tr class="class">
     
-    <td>Module</td>
-    <td><code><a href="session4.modified_quix_demo.mini_demo.html" class="internal-link" title="session4.modified_quix_demo.mini_demo">mini<wbr></wbr>_demo</a></code></td>
-    <td>A minimal Quixote demo.  If you have the 'quixote' package in your Python path, you can run it like this:</td>
+    <td>Class</td>
+    <td><code><a href="session4.Session4Session.Session4SessionManager.html" class="internal-link" title="session4.Session4Session.Session4SessionManager"><wbr></wbr>Session4<wbr></wbr>Session<wbr></wbr>Manager</a></code></td>
+    <td>We sub-class the base version because that is missing __getitem__() and has_session() unfortunately. In future these might be added to Quixote's BaseSessionManager. See https://github.com/nascheme/quixote/issues/8...</td>
   </tr>
 </table>
           
 
-            <p class="fromInitPy">From <code>__init__.py</code>:</p><table class="children sortable" id="id8">
-  
-  
-  <tr class="function">
-    
-    <td>Function</td>
-    <td><code><a href="#create_publisher" class="internal-link" title="session4.modified_quix_demo.create_publisher">create<wbr></wbr>_publisher</a></code></td>
-    <td><span class="rst-undocumented">Undocumented</span></td>
-  </tr>
-</table>
+            
         </div>
 
         <div id="child-list">
-          <div class="basefunction">
-  
-  
-  <a name="session4.modified_quix_demo.create_publisher">
-    
-  </a>
-  <a name="create_publisher">
-    
-  </a>
-  <div class="functionHeader">
-    
-    
-    <span class="py-keyword">def</span>&#160;<span class="py-defname">create_publisher</span><span class="function-signature">() -&gt; <code>Publisher</code>:</span>
-    
-    <a class="headerLink" href="#create_publisher" title="session4.modified_quix_demo.create_publisher">
-      
-      
-      ¶
-    </a>
-  </div>
-  <div class="docstring functionBody">
-    
-    <div><p class="undocumented">Undocumented</p></div>
-  </div>
-</div>
+          
         </div>
       
       </main>
@@ -336,7 +291,7 @@
   <div class="container-fluid">
     <a href="index.html">API Documentation</a> for Session4,
   generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a>
-    25.10.1 at 2026-09-01 18:44:01.
+    25.10.1 at 2026-09-01 19:06:27.
   </div>
 
   <!-- Search related scripts needs to be loaded at the end of HTML 

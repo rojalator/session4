@@ -18,15 +18,15 @@ altdemo:
 	cd src/session4; uv run python -m quixote run --app modified_quix_demo.altdemo
 
 documentation:
-	uv run $(PDOC) doc/api src/session4
-	# uv run $(PYCCO) doc/literate src/session4/*.py src/session4/*.py tests/*.py
+	uv run $(PDOC) docs/api src/session4
+	# uv run $(PYCCO) docs/literate src/session4/*.py src/session4/*.py tests/*.py
 
 # Call 'make clean' to get rid of the documentation directory's html entries
 # No directory or file will be called 'clean' so mark it as a phony
 .PHONY: clean
 clean:
-	rm -rf doc/api/*
-	rm -rf doc/literate/*
+	rm -rf docs/api/*
+	rm -rf docs/literate/*
 	rm -rf dist/*
 
 build:	clean

@@ -10,7 +10,7 @@ and with the addition of the `preserve_current_values()` function. Note that the
 the attribute `_last_values` to compare with current values, so this attribute name should not be
 modified by users of Session4.
 
-A copy of Quixote's [session-mgmt.txt](session-mgmt.txt) is in the ``doc/`` directory for reference[^2],
+A copy of Quixote's [session-mgmt.txt](session-mgmt.txt) is in the ``docs/`` directory for reference[^2],
 but basically there is a session manager class that is responsible for sessions and how to store them by using a
 session instance (in ``session_class``) and a store (in ``session_store``): Quixote calls upon
 methods in the session manager at various points in the *request <-> response cycle*. Note that the

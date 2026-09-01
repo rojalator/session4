@@ -6,7 +6,7 @@ Session4 is copyrighted and made available under open source licensing terms for
 see [LICENSE.txt](LICENSE.txt) for the details.
 The [ACKS.txt](ACKS.txt) file lists the orignial authors (of Session2) and anyone who has
 assisted in the development.
-[RELEASE_NOTES.md](doc/RELEASE_NOTES.md) summarizes the changes in the current release.
+[RELEASE_NOTES.md](docs/RELEASE_NOTES.md) summarizes the changes in the current release.
 
 The current author is Robert Ladyman, <it@file-away.co.uk>
 
@@ -70,7 +70,7 @@ and / or include helpful code in the package.
 
 ### Installation
 
-See the [installation instructions](doc/INSTALL.txt). You can use "uv" to install:
+See the [installation instructions](docs/INSTALL.txt). You can use "uv" to install:
 ```
 uv sync
 ```
@@ -85,7 +85,7 @@ unpack the tar.gz file and install the normal Python way.
 --- either read it on-line or run:
 > make documentation
 
-This will create files within directories with the ``doc/`` directory. You will need
+This will create files within directories with the ``docs/`` directory. You will need
 ``pydoctor`` installed.
 
 ## Using session4
@@ -152,7 +152,7 @@ FCNTL.py.
 
 ### Changes from Session3
 
-See [CHANGES.txt](doc/CHANGES.txt) in the ``doc/`` directory
+See [CHANGES.txt](docs/CHANGES.txt) in the ``docs/`` directory
 
 ------------------------------------------------------------------------
 

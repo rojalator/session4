@@ -6,7 +6,7 @@
 
   <head>
     
-    <title>session4.Session4Session</title>
+    <title>session4.DirectorySessionStore</title>
     <meta name="generator" content="pydoctor 25.10.1"> 
         
     </meta>
@@ -110,7 +110,7 @@
 
       <div class="thingTitle">
         <span>Module</span>
-        <code class="thisobject"><a href="session4.Session4Session.html" class="internal-link" title="This module"><wbr></wbr>Session4<wbr></wbr>Session</a></code> 
+        <code class="thisobject"><a href="session4.DirectorySessionStore.html" class="internal-link" title="This module"><wbr></wbr>Directory<wbr></wbr>Session<wbr></wbr>Store</a></code> 
       </div>
       
       <div>
@@ -128,17 +128,7 @@
         
 
         
-            <div class="itemName"><code><a href="session4.Session4Session.Session4.html" class="internal-link" title="session4.Session4Session.Session4"><wbr></wbr>Session4</a></code>
-            </div>
-        
-
-    </li><li class="">
-        
-        
-        
-
-        
-            <div class="itemName"><code><a href="session4.Session4Session.Session4SessionManager.html" class="internal-link" title="session4.Session4Session.Session4SessionManager"><wbr></wbr>Session4<wbr></wbr>Session<wbr></wbr>Manager</a></code>
+            <div class="itemName"><code><a href="session4.DirectorySessionStore.DirectorySessionStore.html" class="internal-link" title="session4.DirectorySessionStore.DirectorySessionStore"><wbr></wbr>Directory<wbr></wbr>Session<wbr></wbr>Store</a></code>
             </div>
         
 
@@ -171,7 +161,7 @@
         <div class="childrenKindTitle">Modules</div>
         <ul>
     
-    <li class="">
+    <li class=" thisobject">
         
         
         
@@ -191,7 +181,7 @@
             </div>
         
 
-    </li><li class=" thisobject">
+    </li><li class="">
         
         
         
@@ -238,7 +228,7 @@
         
 
         <div class="page-header">
-          <h1 class="module"><code><code><a href="index.html" class="internal-link">session4</a></code><wbr></wbr>.<code><a href="session4.Session4Session.html" class="internal-link" title="session4.Session4Session">Session4Session</a></code></code></h1>
+          <h1 class="module"><code><code><a href="index.html" class="internal-link">session4</a></code><wbr></wbr>.<code><a href="session4.DirectorySessionStore.html" class="internal-link" title="session4.DirectorySessionStore">DirectorySessionStore</a></code></code></h1>
           <div id="show-private">
             <button class="btn btn-link" onclick="togglePrivate()">Toggle Private API</button>
           </div>
@@ -253,24 +243,71 @@
         </div>
 
         <div class="moduleDocstring">
-          <div><p class="pre">This extends Quixote's session class to have auto-detection of added or changed
-members or values, including lists, etc.</p></div>
+          <div><p class="pre">Store sessions in individual files within a directory.
+
+### Note
+There was a problem with the existing code (adopted from
+the Python 2 version), which lead to an "EOFError: Ran out of input" exception
+
+The code in save_session() did:
+
+    f = open(filename, 'wb')
+
+...which immediately made the file zero bytes long. You can try this out in 2
+terminals (where `s` is some dummy class with `s.id` as the file-name) with one doing:
+
+    import pickle
+    pickle.dump(s, f, 4)
+    f.close()
+    f = open(s.id, 'wb')
+
+If in the other terminal you do:
+
+    f = open(s.id, 'rb')
+    o = pickle.load(f)
+    Traceback (most recent call last):
+    ...EOFError: Ran out of input
+
+This is not entirely unexpected BUT the code in `load_session()`:
+
+    f = open(filename, 'rb')
+    fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+
+...could get the shared lock (LOCK_SH) after save_session() performed
+the open() but BEFORE `save_session()` got a chance to get the exclusive lock:
+
+    f = open(filename, 'wb')
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+
+(You can try it in the older code by quickly refreshing a browser calling a Quixote server.)
+
+What happened appears to have been:
+
+  1. save_session() opens the file to write  [f = open(filename, 'wb')]
+  2. load_session() opens the file to read   [f = open(filename, 'rb')]
+  3. load_session() asks for and GETS a shared lock [fcntl.LOCK_SH]
+  4. save_session() asks for an exclusive lock BUT gets blocked by the shared lock
+  5. load_session() tries to load the object and gets zero bytes. It then closes the file, mistakenly allowing save_session() to proceed.
+
+As save_session() truncated the file and then waited for an exclusive lock, we had to have
+load_session() check for a zero-sized file. If it has one, then save_session() has just created (or re-created)
+it and we should let go and try again.
+
+The originial code worked fine on hard discs but begain failing when SSDs came into use (due to speed, I suspect)
+
+### Addendum
+It turns out that, during testing, one can get at `EOFError` from pickle anyway, so a check for that was added too.</p></div>
         </div>
 
         <div id="split-tables">
-          <table class="children sortable" id="id4">
+          <table class="children sortable" id="id2">
   
   
   <tr class="class">
     
     <td>Class</td>
-    <td><code><a href="session4.Session4Session.Session4.html" class="internal-link" title="session4.Session4Session.Session4"><wbr></wbr>Session4</a></code></td>
-    <td>This adapts Quixote's own Session class to overwrite is_dirty() so that the session instance automatically detects changes to its values or additions or removals of members.</td>
-  </tr><tr class="class">
-    
-    <td>Class</td>
-    <td><code><a href="session4.Session4Session.Session4SessionManager.html" class="internal-link" title="session4.Session4Session.Session4SessionManager"><wbr></wbr>Session4<wbr></wbr>Session<wbr></wbr>Manager</a></code></td>
-    <td>We sub-class the base version because that is missing __getitem__() and has_session() unfortunately. In future these might be added to Quixote's BaseSessionManager. See https://github.com/nascheme/quixote/issues/8...</td>
+    <td><code><a href="session4.DirectorySessionStore.DirectorySessionStore.html" class="internal-link" title="session4.DirectorySessionStore.DirectorySessionStore"><wbr></wbr>Directory<wbr></wbr>Session<wbr></wbr>Store</a></code></td>
+    <td>Store sessions in individual files within a directory. The noqa in the definitions are because 'id' is a Python keyword (blame Quixote, not me!)</td>
   </tr>
 </table>
           
@@ -291,7 +328,7 @@ members or values, including lists, etc.</p></div>
   <div class="container-fluid">
     <a href="index.html">API Documentation</a> for Session4,
   generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a>
-    25.10.1 at 2026-09-01 18:44:01.
+    25.10.1 at 2026-09-01 19:06:27.
   </div>
 
   <!-- Search related scripts needs to be loaded at the end of HTML 
