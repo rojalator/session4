@@ -10,13 +10,11 @@ assisted in the development.
 
 The current author is Robert Ladyman, <it@file-away.co.uk>
 
-Version
+### Version ###
+4.0a1 released August 2026 (in development). Version numbers tend to track Quixote
 
-:   4.0a1 released August 2026 (in development). Version numbers tend to track Quixote
-
-Status
-
-:   Only the file-storage mechanism [DirectorySessionStore](src/session4/DirectorySessionStore.py) is currently
+### Status ###
+Only the file-storage mechanism [DirectorySessionStore](src/session4/DirectorySessionStore.py) is currently
 working with Quixote 4+
 
 ## Source code
@@ -39,8 +37,7 @@ session manager, session and store classes to allow persistence for sessions usi
 Session4 version 4.0a1 provides a fully functional[^2] persistent storage back-end for use with
 Quixote 4 and above (also see [Road-map](#road-map) below, for future session4 version notes):-
 
-[DirectorySessionStore](https://rojalator.github.io/session4/literate/session4/store/DirectorySessionStore.html)
-([DirectorySessionStoreAPI](https://rojalator.github.io/session4/session4.store.DirectorySessionStore.html))
+[DirectorySessionStore](https://rojalator.github.io/session4/api/session4.DirectorySessionStore.html)
 
 Store each pickled session in a file in the designated directory.
 The filename for a session is the session ID. Uses `fcntl` file locking. :
@@ -81,7 +78,7 @@ unpack the tar.gz file and install the normal Python way.
 
 ### Documentation
 
-[API documentation](https://rojalator.github.io/session4/moduleIndex.html) is available
+[API documentation](https://rojalator.github.io/session4/api/moduleIndex.html) is available
 --- either read it on-line or run:
 > make documentation
 
@@ -109,7 +106,7 @@ then in your ``create_publisher()`` function, you might place the following code
     publisher = Publisher(..., session_manager=session_manager)
 
 Each session store has different initialization requirements: see
-the [API documentation](https://rojalator.github.io/session4/moduleIndex.html) 
+the [API documentation](https://rojalator.github.io/session4/api/moduleIndex.html) 
 for more information.
 
 ## Features
@@ -160,5 +157,5 @@ See [CHANGES.txt](docs/CHANGES.txt) in the ``docs/`` directory
 unsurprisingly, Quixote 2)
 
 [^2]: Note that only
-[DirectorySessionStore](https://rojalator.github.io/session4/moduleIndex.html)
+[DirectorySessionStore](https://rojalator.github.io/session4/api/moduleIndex.html)
 is working for version 4.0.0
